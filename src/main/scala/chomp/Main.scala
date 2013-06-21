@@ -59,22 +59,12 @@ case class Board(rows: Seq[Seq[Boolean]]) {
 
   // TODO, clean this up
   def makeMove(move: Move): Board = {
-    def helper(row: Int, col: Int, rows: Seq[Seq[Boolean]]): Seq[Seq[Boolean]] = (row, rows) match {
-      case (_, Nil) => Nil
-      case (0, rs) => alterCols(col, rs)
-      case (n, r :: rs) => r +: helper(n-1, col, rs)
-    }
-    def alterCols(col:Int, rows: Seq[Seq[Boolean]]): Seq[Seq[Boolean]] = {
-      def alterCol(col: Int, vals: Seq[Boolean]): Seq[Boolean] = (col, vals) match {
-        case (_, Nil) => Nil
-        case (0, v :: vs) => false +: alterCol(0, vs)
-        case (c, v :: vs) => v +: alterCol(c-1, vs)
-      }
+    def updateCols(row: Seq[Boolean]): Seq[Boolean] =
+      (move.col until nCols).foldLeft(row) {(cs, n) => cs.updated(n, false)}
 
-      rows.map { r => alterCol(col, r) }
-    }
+    val newRows = (move.row until nRows).foldLeft(rows) {(rs, n) => rs.updated(n, updateCols(rs(n)))}
 
-    Board(helper(move.row, move.col, rows))
+    Board(newRows)
   }
 }
 
