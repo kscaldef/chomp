@@ -1,17 +1,12 @@
 package chomp
 
 object Main extends App {
-  println("Let's play chomp\n")
+  println("Let's play chomp!\n")
 
-  var board = Board.initial(3,4).display
+  val board = Board.initial(3,4).display
 
-  while (!board.gameOver) {
-    board = userMove(board)
-
-    if (!board.gameOver) {
-      board = computerMove(board)
-    }
-  }
+  // Alternate moves until the game is over (.size just forces evaluation)
+  Stream.continually(Stream(userMove _,computerMove _)).flatten.scanLeft(board) { (b,f) => f(b) }.takeWhile { !_.gameOver }.size
 
   def userMove(board: Board): Board = {
     val move = Move.input
@@ -57,7 +52,6 @@ case class Board(rows: Seq[Seq[Boolean]]) {
     this
   }
 
-  // TODO, clean this up
   def makeMove(move: Move): Board = {
     def updateCols(row: Seq[Boolean]): Seq[Boolean] =
       (move.col until nCols).foldLeft(row) {(cs, n) => cs.updated(n, false)}
